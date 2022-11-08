@@ -1,9 +1,32 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"easycom": {
+		"custom": {  
+	    	"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue" 
+		}
+	},
+	"pages": [
 		{
-			"path": "pages/index/index",
+			"path": "pages/answer/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "早晚答"
+			}
+		},
+		{
+			"path": "pages/search/index",
+			"style": {
+				"navigationBarTitleText": "早晚答"
+			}
+		},
+		{
+			"path": "pages/more/index",
+			"style": {
+				"navigationBarTitleText": "早晚答"
+			}
+		},
+		{
+			"path": "pages/my/index",
+			"style": {
+				"navigationBarTitleText": "早晚答"
 			}
 		}
 	],
@@ -12,5 +35,38 @@
 		"navigationBarTitleText": "uni-app",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
-	}
+	},
+
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#5b91dc",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+			"pagePath": "pages/answer/index",
+			"iconPath": "static/images/coupon-o.png",
+			"selectedIconPath": "static/images/coupon-o-select.png",
+			"text": "答题"
+			}, 
+			{
+				"pagePath": "pages/search/index",
+				"iconPath": "static/images/search.png",
+				"selectedIconPath": "static/images/search-select.png",
+				"text": "搜索"
+			},
+			{
+				"pagePath": "pages/more/index",
+				"iconPath": "static/images/more.png",
+				"selectedIconPath": "static/images/more-select.png",
+				"text": "更多"
+			},
+			{
+				"pagePath": "pages/my/index",
+				"iconPath": "static/images/cc-user.png",
+				"selectedIconPath": "static/images/cc-user-select.png",
+				"text": "我的"
+			}
+		]
+	}	
 }
