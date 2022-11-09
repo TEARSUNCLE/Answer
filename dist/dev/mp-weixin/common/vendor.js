@@ -14,6 +14,79 @@ function makeMap(str, expectsLowerCase) {
   }
   return expectsLowerCase ? (val) => !!map[val.toLowerCase()] : (val) => !!map[val];
 }
+function normalizeStyle(value) {
+  if (isArray$1(value)) {
+    const res = {};
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      const normalized = isString(item) ? parseStringStyle(item) : normalizeStyle(item);
+      if (normalized) {
+        for (const key in normalized) {
+          res[key] = normalized[key];
+        }
+      }
+    }
+    return res;
+  } else if (isString(value)) {
+    return value;
+  } else if (isObject$1(value)) {
+    return value;
+  }
+}
+const listDelimiterRE = /;(?![^(]*\))/g;
+const propertyDelimiterRE = /:(.+)/;
+function parseStringStyle(cssText) {
+  const ret = {};
+  cssText.split(listDelimiterRE).forEach((item) => {
+    if (item) {
+      const tmp = item.split(propertyDelimiterRE);
+      tmp.length > 1 && (ret[tmp[0].trim()] = tmp[1].trim());
+    }
+  });
+  return ret;
+}
+function normalizeClass(value) {
+  let res = "";
+  if (isString(value)) {
+    res = value;
+  } else if (isArray$1(value)) {
+    for (let i = 0; i < value.length; i++) {
+      const normalized = normalizeClass(value[i]);
+      if (normalized) {
+        res += normalized + " ";
+      }
+    }
+  } else if (isObject$1(value)) {
+    for (const name in value) {
+      if (value[name]) {
+        res += name + " ";
+      }
+    }
+  }
+  return res.trim();
+}
+const toDisplayString = (val) => {
+  return isString(val) ? val : val == null ? "" : isArray$1(val) || isObject$1(val) && (val.toString === objectToString || !isFunction(val.toString)) ? JSON.stringify(val, replacer, 2) : String(val);
+};
+const replacer = (_key, val) => {
+  if (val && val.__v_isRef) {
+    return replacer(_key, val.value);
+  } else if (isMap(val)) {
+    return {
+      [`Map(${val.size})`]: [...val.entries()].reduce((entries, [key, val2]) => {
+        entries[`${key} =>`] = val2;
+        return entries;
+      }, {})
+    };
+  } else if (isSet(val)) {
+    return {
+      [`Set(${val.size})`]: [...val.values()]
+    };
+  } else if (isObject$1(val) && !isArray$1(val) && !isPlainObject$1(val)) {
+    return String(val);
+  }
+  return val;
+};
 const EMPTY_OBJ = Object.freeze({});
 const EMPTY_ARR = Object.freeze([]);
 const NOOP = () => {
@@ -81,8 +154,8 @@ const def = (obj, key, value) => {
   });
 };
 const toNumber = (val) => {
-  const n = parseFloat(val);
-  return isNaN(n) ? val : n;
+  const n2 = parseFloat(val);
+  return isNaN(n2) ? val : n2;
 };
 const LINEFEED = "\n";
 const SLOT_DEFAULT_NAME = "d";
@@ -268,8 +341,8 @@ const E = function() {
 };
 E.prototype = {
   on: function(name, callback, ctx) {
-    var e = this.e || (this.e = {});
-    (e[name] || (e[name] = [])).push({
+    var e2 = this.e || (this.e = {});
+    (e2[name] || (e2[name] = [])).push({
       fn: callback,
       ctx
     });
@@ -295,8 +368,8 @@ E.prototype = {
     return this;
   },
   off: function(name, callback) {
-    var e = this.e || (this.e = {});
-    var evts = e[name];
+    var e2 = this.e || (this.e = {});
+    var evts = e2[name];
     var liveEvents = [];
     if (evts && callback) {
       for (var i = 0, len = evts.length; i < len; i++) {
@@ -304,7 +377,7 @@ E.prototype = {
           liveEvents.push(evts[i]);
       }
     }
-    liveEvents.length ? e[name] = liveEvents : delete e[name];
+    liveEvents.length ? e2[name] = liveEvents : delete e2[name];
     return this;
   }
 };
@@ -417,9 +490,9 @@ function assertType$1(value, type) {
   let valid;
   const expectedType = getType$1(type);
   if (isSimpleType$1(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -475,8 +548,8 @@ function tryCatch(fn) {
   return function() {
     try {
       return fn.apply(fn, arguments);
-    } catch (e) {
-      console.error(e);
+    } catch (e2) {
+      console.error(e2);
     }
   };
 }
@@ -658,8 +731,8 @@ function promisify$1(name, fn) {
     if (hasCallback(args)) {
       return wrapperReturnValue(name, invokeApi(name, fn, args, rest));
     }
-    return wrapperReturnValue(name, handlePromise(new Promise((resolve, reject) => {
-      invokeApi(name, fn, extend(args, { success: resolve, fail: reject }), rest);
+    return wrapperReturnValue(name, handlePromise(new Promise((resolve2, reject) => {
+      invokeApi(name, fn, extend(args, { success: resolve2, fail: reject }), rest);
     })));
   };
 }
@@ -900,7 +973,7 @@ const $off = defineSyncApi(API_OFF, (name, callback) => {
   }
   if (!isArray$1(name))
     name = [name];
-  name.forEach((n) => emitter.off(n, callback));
+  name.forEach((n2) => emitter.off(n2, callback));
 }, OffProtocol);
 const $emit = defineSyncApi(API_EMIT, (name, ...args) => {
   emitter.emit(name, ...args);
@@ -911,7 +984,7 @@ let enabled;
 function normalizePushMessage(message) {
   try {
     return JSON.parse(message);
-  } catch (e) {
+  } catch (e2) {
   }
   return message;
 }
@@ -951,7 +1024,7 @@ function invokeGetPushCidCallbacks(cid2, errMsg) {
   getPushCidCallbacks.length = 0;
 }
 const API_GET_PUSH_CLIENT_ID = "getPushClientId";
-const getPushClientId = defineAsyncApi(API_GET_PUSH_CLIENT_ID, (_, { resolve, reject }) => {
+const getPushClientId = defineAsyncApi(API_GET_PUSH_CLIENT_ID, (_, { resolve: resolve2, reject }) => {
   Promise.resolve().then(() => {
     if (typeof enabled === "undefined") {
       enabled = false;
@@ -960,7 +1033,7 @@ const getPushClientId = defineAsyncApi(API_GET_PUSH_CLIENT_ID, (_, { resolve, re
     }
     getPushCidCallbacks.push((cid2, errMsg) => {
       if (cid2) {
-        resolve({ cid: cid2 });
+        resolve2({ cid: cid2 });
       } else {
         reject(errMsg);
       }
@@ -1025,9 +1098,9 @@ function promisify(name, api) {
     if (isFunction(options.success) || isFunction(options.fail) || isFunction(options.complete)) {
       return wrapperReturnValue(name, invokeApi(name, api, options, rest));
     }
-    return wrapperReturnValue(name, handlePromise(new Promise((resolve, reject) => {
+    return wrapperReturnValue(name, handlePromise(new Promise((resolve2, reject) => {
       invokeApi(name, api, extend({}, options, {
-        success: resolve,
+        success: resolve2,
         fail: reject
       }), rest);
     })));
@@ -1243,8 +1316,8 @@ function populateParameters(fromRes, toRes) {
     appVersion: "1.0.0",
     appVersionCode: "100",
     appLanguage: getAppLanguage(hostLanguage),
-    uniCompileVersion: "3.6.7",
-    uniRuntimeVersion: "3.6.7",
+    uniCompileVersion: "3.6.8",
+    uniRuntimeVersion: "3.6.8",
     uniPlatform: "mp-weixin",
     deviceBrand,
     deviceModel: model,
@@ -2217,6 +2290,9 @@ function isReadonly(value) {
 function isShallow(value) {
   return !!(value && value["__v_isShallow"]);
 }
+function isProxy(value) {
+  return isReactive(value) || isReadonly(value);
+}
 function toRaw(observed) {
   const raw = observed && observed["__v_raw"];
   return raw ? toRaw(raw) : observed;
@@ -2557,8 +2633,8 @@ const resolvedPromise = /* @__PURE__ */ Promise.resolve();
 let currentFlushPromise = null;
 const RECURSION_LIMIT = 100;
 function nextTick(fn) {
-  const p = currentFlushPromise || resolvedPromise;
-  return fn ? p.then(this ? fn.bind(this) : fn) : p;
+  const p2 = currentFlushPromise || resolvedPromise;
+  return fn ? p2.then(this ? fn.bind(this) : fn) : p2;
 }
 function findInsertionIndex(id) {
   let start = flushIndex + 1;
@@ -2872,8 +2948,8 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = EM
       warn$1(`watch() "deep" option is only respected when using the watch(source, callback, options?) signature.`);
     }
   }
-  const warnInvalidSource = (s) => {
-    warn$1(`Invalid watch source: `, s, `A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.`);
+  const warnInvalidSource = (s2) => {
+    warn$1(`Invalid watch source: `, s2, `A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.`);
   };
   const instance = currentInstance;
   let getter;
@@ -2887,16 +2963,16 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = EM
     deep = true;
   } else if (isArray$1(source)) {
     isMultiSource = true;
-    forceTrigger = source.some((s) => isReactive(s) || isShallow(s));
-    getter = () => source.map((s) => {
-      if (isRef(s)) {
-        return s.value;
-      } else if (isReactive(s)) {
-        return traverse(s);
-      } else if (isFunction(s)) {
-        return callWithErrorHandling(s, instance, 2);
+    forceTrigger = source.some((s2) => isReactive(s2) || isShallow(s2));
+    getter = () => source.map((s2) => {
+      if (isRef(s2)) {
+        return s2.value;
+      } else if (isReactive(s2)) {
+        return traverse(s2);
+      } else if (isFunction(s2)) {
+        return callWithErrorHandling(s2, instance, 2);
       } else {
-        warnInvalidSource(s);
+        warnInvalidSource(s2);
       }
     });
   } else if (isFunction(source)) {
@@ -3124,6 +3200,37 @@ function validateDirectiveName(name) {
     warn$1("Do not use built-in directive ids as custom directive id: " + name);
   }
 }
+const COMPONENTS = "components";
+function resolveComponent(name, maybeSelfReference) {
+  return resolveAsset(COMPONENTS, name, true, maybeSelfReference) || name;
+}
+function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false) {
+  const instance = currentRenderingInstance || currentInstance;
+  if (instance) {
+    const Component2 = instance.type;
+    if (type === COMPONENTS) {
+      const selfName = getComponentName(Component2, false);
+      if (selfName && (selfName === name || selfName === camelize(name) || selfName === capitalize(camelize(name)))) {
+        return Component2;
+      }
+    }
+    const res = resolve(instance[type] || Component2[type], name) || resolve(instance.appContext[type], name);
+    if (!res && maybeSelfReference) {
+      return Component2;
+    }
+    if (warnMissing && !res) {
+      const extra = type === COMPONENTS ? `
+If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement.` : ``;
+      warn$1(`Failed to resolve ${type.slice(0, -1)}: ${name}${extra}`);
+    }
+    return res;
+  } else {
+    warn$1(`resolve${capitalize(type.slice(0, -1))} can only be used in render() or setup().`);
+  }
+}
+function resolve(registry, name) {
+  return registry && (registry[name] || registry[camelize(name)] || registry[capitalize(camelize(name))]);
+}
 const getPublicInstance = (i) => {
   if (!i)
     return null;
@@ -3158,9 +3265,9 @@ const PublicInstanceProxyHandlers = {
     }
     let normalizedProps;
     if (key[0] !== "$") {
-      const n = accessCache[key];
-      if (n !== void 0) {
-        switch (n) {
+      const n2 = accessCache[key];
+      if (n2 !== void 0) {
+        switch (n2) {
           case 1:
             return setupState[key];
           case 2:
@@ -3924,7 +4031,7 @@ function isSameType(a, b) {
 }
 function getTypeIndex(type, expectedTypes) {
   if (isArray$1(expectedTypes)) {
-    return expectedTypes.findIndex((t) => isSameType(t, type));
+    return expectedTypes.findIndex((t2) => isSameType(t2, type));
   } else if (isFunction(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1;
   }
@@ -3972,9 +4079,9 @@ function assertType(value, type) {
   let valid;
   const expectedType = getType(type);
   if (isSimpleType(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -4139,6 +4246,12 @@ function createAppAPI(render, hydrate) {
 const queuePostRenderEffect = queuePostFlushCb;
 function isVNode(value) {
   return value ? value.__v_isVNode === true : false;
+}
+const InternalObjectKey = `__vInternal`;
+function guardReactiveProps(props2) {
+  if (!props2)
+    return null;
+  return isProxy(props2) || InternalObjectKey in props2 ? extend({}, props2) : props2;
 }
 const emptyAppContext = createAppContext();
 let uid$1 = 0;
@@ -4541,8 +4654,8 @@ function nextTick$1(instance, fn) {
       _resolve(instance.proxy);
     }
   });
-  return new Promise((resolve) => {
-    _resolve = resolve;
+  return new Promise((resolve2) => {
+    _resolve = resolve2;
   });
 }
 function clone$1(src, seen) {
@@ -4868,8 +4981,8 @@ function setupRenderEffect(instance) {
   update.id = instance.uid;
   toggleRecurse(instance, true);
   {
-    effect.onTrack = instance.rtc ? (e) => invokeArrayFns$1(instance.rtc, e) : void 0;
-    effect.onTrigger = instance.rtg ? (e) => invokeArrayFns$1(instance.rtg, e) : void 0;
+    effect.onTrack = instance.rtc ? (e2) => invokeArrayFns$1(instance.rtc, e2) : void 0;
+    effect.onTrigger = instance.rtg ? (e2) => invokeArrayFns$1(instance.rtg, e2) : void 0;
     update.ownerInstance = instance;
   }
   update();
@@ -4934,7 +5047,7 @@ function injectLifecycleHook(name, hook, publicThis, instance) {
 }
 function initHooks$1(options, instance, publicThis) {
   const mpType = options.mpType || publicThis.$mpType;
-  if (!mpType) {
+  if (!mpType || mpType === "component") {
     return;
   }
   Object.keys(options).forEach((name) => {
@@ -5058,6 +5171,11 @@ function initApp(app) {
   }
 }
 const propsCaches = /* @__PURE__ */ Object.create(null);
+function renderProps(props2) {
+  const { uid: uid2, __counter } = getCurrentInstance();
+  const propsId = (propsCaches[uid2] || (propsCaches[uid2] = [])).push(guardReactiveProps(props2)) - 1;
+  return uid2 + "," + propsId + "," + __counter;
+}
 function pruneComponentPropsCache(uid2) {
   delete propsCaches[uid2];
 }
@@ -5098,6 +5216,117 @@ function getCreateApp() {
     return my[method];
   }
 }
+function vOn(value, key) {
+  const instance = getCurrentInstance();
+  const ctx = instance.ctx;
+  const extraKey = typeof key !== "undefined" && (ctx.$mpPlatform === "mp-weixin" || ctx.$mpPlatform === "mp-qq") && (isString(key) || typeof key === "number") ? "_" + key : "";
+  const name = "e" + instance.$ei++ + extraKey;
+  const mpInstance = ctx.$scope;
+  if (!value) {
+    delete mpInstance[name];
+    return name;
+  }
+  const existingInvoker = mpInstance[name];
+  if (existingInvoker) {
+    existingInvoker.value = value;
+  } else {
+    mpInstance[name] = createInvoker(value, instance);
+  }
+  return name;
+}
+function createInvoker(initialValue, instance) {
+  const invoker = (e2) => {
+    patchMPEvent(e2);
+    let args = [e2];
+    if (e2.detail && e2.detail.__args__) {
+      args = e2.detail.__args__;
+    }
+    const eventValue = invoker.value;
+    const invoke = () => callWithAsyncErrorHandling(patchStopImmediatePropagation(e2, eventValue), instance, 5, args);
+    const eventTarget = e2.target;
+    const eventSync = eventTarget ? eventTarget.dataset ? eventTarget.dataset.eventsync === "true" : false : false;
+    if (bubbles.includes(e2.type) && !eventSync) {
+      setTimeout(invoke);
+    } else {
+      const res = invoke();
+      if (e2.type === "input" && (isArray$1(res) || isPromise(res))) {
+        return;
+      }
+      return res;
+    }
+  };
+  invoker.value = initialValue;
+  return invoker;
+}
+const bubbles = [
+  "tap",
+  "longpress",
+  "longtap",
+  "transitionend",
+  "animationstart",
+  "animationiteration",
+  "animationend",
+  "touchforcechange"
+];
+function patchMPEvent(event) {
+  if (event.type && event.target) {
+    event.preventDefault = NOOP;
+    event.stopPropagation = NOOP;
+    event.stopImmediatePropagation = NOOP;
+    if (!hasOwn(event, "detail")) {
+      event.detail = {};
+    }
+    if (hasOwn(event, "markerId")) {
+      event.detail = typeof event.detail === "object" ? event.detail : {};
+      event.detail.markerId = event.markerId;
+    }
+    if (isPlainObject$1(event.detail) && hasOwn(event.detail, "checked") && !hasOwn(event.detail, "value")) {
+      event.detail.value = event.detail.checked;
+    }
+    if (isPlainObject$1(event.detail)) {
+      event.target = extend({}, event.target, event.detail);
+    }
+  }
+}
+function patchStopImmediatePropagation(e2, value) {
+  if (isArray$1(value)) {
+    const originalStop = e2.stopImmediatePropagation;
+    e2.stopImmediatePropagation = () => {
+      originalStop && originalStop.call(e2);
+      e2._stopped = true;
+    };
+    return value.map((fn) => (e3) => !e3._stopped && fn(e3));
+  } else {
+    return value;
+  }
+}
+function stringifyStyle(value) {
+  if (isString(value)) {
+    return value;
+  }
+  return stringify(normalizeStyle(value));
+}
+function stringify(styles) {
+  let ret = "";
+  if (!styles || isString(styles)) {
+    return ret;
+  }
+  for (const key in styles) {
+    ret += `${key.startsWith(`--`) ? key : hyphenate(key)}:${styles[key]};`;
+  }
+  return ret;
+}
+function setRef(ref2, id, opts = {}) {
+  const { $templateRefs } = getCurrentInstance();
+  $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
+}
+const o = (value, key) => vOn(value, key);
+const s = (value) => stringifyStyle(value);
+const e = (target, ...sources) => extend(target, ...sources);
+const n = (value) => normalizeClass(value);
+const t = (val) => toDisplayString(val);
+const p = (props2) => renderProps(props2);
+const sr = (ref2, id, opts) => setRef(ref2, id, opts);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
   return createVueApp(rootComponent, rootProps).use(plugin);
@@ -5951,13 +6180,13 @@ const mixin = {
       }
     },
     $uGetRect(selector, all) {
-      return new Promise((resolve) => {
+      return new Promise((resolve2) => {
         index$1.createSelectorQuery().in(this)[all ? "selectAll" : "select"](selector).boundingClientRect((rect) => {
           if (all && Array.isArray(rect) && rect.length) {
-            resolve(rect);
+            resolve2(rect);
           }
           if (!all && rect) {
-            resolve(rect);
+            resolve2(rect);
           }
         }).exec();
       });
@@ -5975,11 +6204,11 @@ const mixin = {
         });
       }
     },
-    preventEvent(e) {
-      e && typeof e.stopPropagation === "function" && e.stopPropagation();
+    preventEvent(e2) {
+      e2 && typeof e2.stopPropagation === "function" && e2.stopPropagation();
     },
-    noop(e) {
-      this.preventEvent(e);
+    noop(e2) {
+      this.preventEvent(e2);
     }
   },
   onReachBottom() {
@@ -6108,11 +6337,11 @@ function buildFullPath(baseURL, requestedURL) {
   }
   return requestedURL;
 }
-function settle(resolve, reject, response) {
+function settle(resolve2, reject, response) {
   const { validateStatus: validateStatus2 } = response.config;
   const status = response.statusCode;
   if (status && (!validateStatus2 || validateStatus2(status))) {
-    resolve(response);
+    resolve2(response);
   } else {
     reject(response);
   }
@@ -6126,7 +6355,7 @@ const mergeKeys$1 = (keys, config2) => {
   });
   return config3;
 };
-const adapter = (config2) => new Promise((resolve, reject) => {
+const adapter = (config2) => new Promise((resolve2, reject) => {
   const fullPath = buildURL(buildFullPath(config2.baseURL, config2.url), config2.params);
   const _config = {
     url: fullPath,
@@ -6138,9 +6367,9 @@ const adapter = (config2) => new Promise((resolve, reject) => {
         if (typeof response.data === "string") {
           response.data = JSON.parse(response.data);
         }
-      } catch (e) {
+      } catch (e2) {
       }
-      settle(resolve, reject, response);
+      settle(resolve2, reject, response);
     }
   };
   let requestTask;
@@ -6309,9 +6538,9 @@ var clone = function() {
       } else if (_instanceof(parent2, nativeSet)) {
         child = new nativeSet();
       } else if (_instanceof(parent2, nativePromise)) {
-        child = new nativePromise(function(resolve, reject) {
+        child = new nativePromise(function(resolve2, reject) {
           parent2.then(function(value) {
-            resolve(_clone(value, depth2 - 1));
+            resolve2(_clone(value, depth2 - 1));
           }, function(err) {
             reject(_clone(err, depth2 - 1));
           });
@@ -6375,10 +6604,10 @@ var clone = function() {
             continue;
           }
           child[i] = _clone(parent2[i], depth2 - 1);
-        } catch (e) {
-          if (e instanceof TypeError) {
+        } catch (e2) {
+          if (e2 instanceof TypeError) {
             continue;
-          } else if (e instanceof ReferenceError) {
+          } else if (e2 instanceof ReferenceError) {
             continue;
           }
         }
@@ -6419,20 +6648,20 @@ var clone = function() {
     c.prototype = parent;
     return new c();
   };
-  function __objToStr(o) {
-    return Object.prototype.toString.call(o);
+  function __objToStr(o2) {
+    return Object.prototype.toString.call(o2);
   }
   clone2.__objToStr = __objToStr;
-  function __isDate(o) {
-    return typeof o === "object" && __objToStr(o) === "[object Date]";
+  function __isDate(o2) {
+    return typeof o2 === "object" && __objToStr(o2) === "[object Date]";
   }
   clone2.__isDate = __isDate;
-  function __isArray(o) {
-    return typeof o === "object" && __objToStr(o) === "[object Array]";
+  function __isArray(o2) {
+    return typeof o2 === "object" && __objToStr(o2) === "[object Array]";
   }
   clone2.__isArray = __isArray;
-  function __isRegExp(o) {
-    return typeof o === "object" && __objToStr(o) === "[object RegExp]";
+  function __isRegExp(o2) {
+    return typeof o2 === "object" && __objToStr(o2) === "[object RegExp]";
   }
   clone2.__isRegExp = __isRegExp;
   function __getRegExpFlags(re) {
@@ -6598,8 +6827,8 @@ class Router {
     mergeConfig2.params = params;
     mergeConfig2 = index$1.$u.deepMerge(this.config, mergeConfig2);
     if (typeof index$1.$u.routeIntercept === "function") {
-      const isNext = await new Promise((resolve, reject) => {
-        index$1.$u.routeIntercept(mergeConfig2, resolve);
+      const isNext = await new Promise((resolve2, reject) => {
+        index$1.$u.routeIntercept(mergeConfig2, resolve2);
       });
       isNext && this.openPage(mergeConfig2);
     } else {
@@ -6859,7 +7088,7 @@ function jsonString(value) {
         return true;
       }
       return false;
-    } catch (e) {
+    } catch (e2) {
       return false;
     }
   }
@@ -6892,8 +7121,8 @@ function video(value) {
   const VIDEO_REGEXP = /\.(mp4|mpg|mpeg|dat|asf|avi|rm|rmvb|mov|wmv|flv|mkv|m3u8)/i;
   return VIDEO_REGEXP.test(value);
 }
-function regExp(o) {
-  return o && Object.prototype.toString.call(o) === "[object RegExp]";
+function regExp(o2) {
+  return o2 && Object.prototype.toString.call(o2) === "[object RegExp]";
 }
 const test = {
   email,
@@ -7035,9 +7264,9 @@ function getPx(value, unit = false) {
   return unit ? `${parseInt(value)}px` : parseInt(value);
 }
 function sleep(value = 30) {
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     setTimeout(() => {
-      resolve();
+      resolve2();
     }, value);
   });
 }
@@ -7125,13 +7354,13 @@ function deepClone(obj) {
   if (typeof obj !== "object" && typeof obj !== "function") {
     return obj;
   }
-  const o = test.array(obj) ? [] : {};
+  const o2 = test.array(obj) ? [] : {};
   for (const i in obj) {
     if (obj.hasOwnProperty(i)) {
-      o[i] = typeof obj[i] === "object" ? deepClone(obj[i]) : obj[i];
+      o2[i] = typeof obj[i] === "object" ? deepClone(obj[i]) : obj[i];
     }
   }
-  return o;
+  return o2;
 }
 function deepMerge(target = {}, source = {}) {
   target = deepClone(target);
@@ -7347,21 +7576,21 @@ function type2icon(type = "success", fill = false) {
 }
 function priceFormat(number2, decimals = 0, decimalPoint = ".", thousandsSeparator = ",") {
   number2 = `${number2}`.replace(/[^0-9+-Ee.]/g, "");
-  const n = !isFinite(+number2) ? 0 : +number2;
+  const n2 = !isFinite(+number2) ? 0 : +number2;
   const prec = !isFinite(+decimals) ? 0 : Math.abs(decimals);
   const sep = typeof thousandsSeparator === "undefined" ? "," : thousandsSeparator;
   const dec = typeof decimalPoint === "undefined" ? "." : decimalPoint;
-  let s = "";
-  s = (prec ? round(n, prec) + "" : `${Math.round(n)}`).split(".");
+  let s2 = "";
+  s2 = (prec ? round(n2, prec) + "" : `${Math.round(n2)}`).split(".");
   const re = /(-?\d+)(\d{3})/;
-  while (re.test(s[0])) {
-    s[0] = s[0].replace(re, `$1${sep}$2`);
+  while (re.test(s2[0])) {
+    s2[0] = s2[0].replace(re, `$1${sep}$2`);
   }
-  if ((s[1] || "").length < prec) {
-    s[1] = s[1] || "";
-    s[1] += new Array(prec - s[1].length + 1).join("0");
+  if ((s2[1] || "").length < prec) {
+    s2[1] = s2[1] || "";
+    s2[1] += new Array(prec - s2[1].length + 1).join("0");
   }
-  return s.join(dec);
+  return s2.join(dec);
 }
 function getDuration(value, unit = true) {
   const valueNum = parseInt(value);
@@ -8844,7 +9073,7 @@ const upload = {
     previewImage: true
   }
 };
-const props = {
+const defprops = {
   ...actionSheet,
   ...album,
   ...alert,
@@ -8965,7 +9194,7 @@ const $u = {
   throttle,
   mixin,
   mpMixin,
-  props,
+  props: defprops,
   ...index,
   color,
   platform: platform$1
@@ -8987,10 +9216,445 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
+const props$3 = {
+  props: {
+    title: {
+      type: [String, Number],
+      default: defprops.cell.title
+    },
+    label: {
+      type: [String, Number],
+      default: defprops.cell.label
+    },
+    value: {
+      type: [String, Number],
+      default: defprops.cell.value
+    },
+    icon: {
+      type: String,
+      default: defprops.cell.icon
+    },
+    disabled: {
+      type: Boolean,
+      default: defprops.cell.disabled
+    },
+    border: {
+      type: Boolean,
+      default: defprops.cell.border
+    },
+    center: {
+      type: Boolean,
+      default: defprops.cell.center
+    },
+    url: {
+      type: String,
+      default: defprops.cell.url
+    },
+    linkType: {
+      type: String,
+      default: defprops.cell.linkType
+    },
+    clickable: {
+      type: Boolean,
+      default: defprops.cell.clickable
+    },
+    isLink: {
+      type: Boolean,
+      default: defprops.cell.isLink
+    },
+    required: {
+      type: Boolean,
+      default: defprops.cell.required
+    },
+    rightIcon: {
+      type: String,
+      default: defprops.cell.rightIcon
+    },
+    arrowDirection: {
+      type: String,
+      default: defprops.cell.arrowDirection
+    },
+    iconStyle: {
+      type: [Object, String],
+      default: () => {
+        return index$1.$u.props.cell.iconStyle;
+      }
+    },
+    rightIconStyle: {
+      type: [Object, String],
+      default: () => {
+        return index$1.$u.props.cell.rightIconStyle;
+      }
+    },
+    titleStyle: {
+      type: [Object, String],
+      default: () => {
+        return index$1.$u.props.cell.titleStyle;
+      }
+    },
+    size: {
+      type: String,
+      default: defprops.cell.size
+    },
+    stop: {
+      type: Boolean,
+      default: defprops.cell.stop
+    },
+    name: {
+      type: [Number, String],
+      default: defprops.cell.name
+    }
+  }
+};
+const props$2 = {
+  props: {
+    title: {
+      type: String,
+      default: defprops.cellGroup.title
+    },
+    border: {
+      type: Boolean,
+      default: defprops.cellGroup.border
+    }
+  }
+};
+const icons = {
+  "uicon-level": "\uE693",
+  "uicon-column-line": "\uE68E",
+  "uicon-checkbox-mark": "\uE807",
+  "uicon-folder": "\uE7F5",
+  "uicon-movie": "\uE7F6",
+  "uicon-star-fill": "\uE669",
+  "uicon-star": "\uE65F",
+  "uicon-phone-fill": "\uE64F",
+  "uicon-phone": "\uE622",
+  "uicon-apple-fill": "\uE881",
+  "uicon-chrome-circle-fill": "\uE885",
+  "uicon-backspace": "\uE67B",
+  "uicon-attach": "\uE632",
+  "uicon-cut": "\uE948",
+  "uicon-empty-car": "\uE602",
+  "uicon-empty-coupon": "\uE682",
+  "uicon-empty-address": "\uE646",
+  "uicon-empty-favor": "\uE67C",
+  "uicon-empty-permission": "\uE686",
+  "uicon-empty-news": "\uE687",
+  "uicon-empty-search": "\uE664",
+  "uicon-github-circle-fill": "\uE887",
+  "uicon-rmb": "\uE608",
+  "uicon-person-delete-fill": "\uE66A",
+  "uicon-reload": "\uE788",
+  "uicon-order": "\uE68F",
+  "uicon-server-man": "\uE6BC",
+  "uicon-search": "\uE62A",
+  "uicon-fingerprint": "\uE955",
+  "uicon-more-dot-fill": "\uE630",
+  "uicon-scan": "\uE662",
+  "uicon-share-square": "\uE60B",
+  "uicon-map": "\uE61D",
+  "uicon-map-fill": "\uE64E",
+  "uicon-tags": "\uE629",
+  "uicon-tags-fill": "\uE651",
+  "uicon-bookmark-fill": "\uE63B",
+  "uicon-bookmark": "\uE60A",
+  "uicon-eye": "\uE613",
+  "uicon-eye-fill": "\uE641",
+  "uicon-mic": "\uE64A",
+  "uicon-mic-off": "\uE649",
+  "uicon-calendar": "\uE66E",
+  "uicon-calendar-fill": "\uE634",
+  "uicon-trash": "\uE623",
+  "uicon-trash-fill": "\uE658",
+  "uicon-play-left": "\uE66D",
+  "uicon-play-right": "\uE610",
+  "uicon-minus": "\uE618",
+  "uicon-plus": "\uE62D",
+  "uicon-info": "\uE653",
+  "uicon-info-circle": "\uE7D2",
+  "uicon-info-circle-fill": "\uE64B",
+  "uicon-question": "\uE715",
+  "uicon-error": "\uE6D3",
+  "uicon-close": "\uE685",
+  "uicon-checkmark": "\uE6A8",
+  "uicon-android-circle-fill": "\uE67E",
+  "uicon-android-fill": "\uE67D",
+  "uicon-ie": "\uE87B",
+  "uicon-IE-circle-fill": "\uE889",
+  "uicon-google": "\uE87A",
+  "uicon-google-circle-fill": "\uE88A",
+  "uicon-setting-fill": "\uE872",
+  "uicon-setting": "\uE61F",
+  "uicon-minus-square-fill": "\uE855",
+  "uicon-plus-square-fill": "\uE856",
+  "uicon-heart": "\uE7DF",
+  "uicon-heart-fill": "\uE851",
+  "uicon-camera": "\uE7D7",
+  "uicon-camera-fill": "\uE870",
+  "uicon-more-circle": "\uE63E",
+  "uicon-more-circle-fill": "\uE645",
+  "uicon-chat": "\uE620",
+  "uicon-chat-fill": "\uE61E",
+  "uicon-bag-fill": "\uE617",
+  "uicon-bag": "\uE619",
+  "uicon-error-circle-fill": "\uE62C",
+  "uicon-error-circle": "\uE624",
+  "uicon-close-circle": "\uE63F",
+  "uicon-close-circle-fill": "\uE637",
+  "uicon-checkmark-circle": "\uE63D",
+  "uicon-checkmark-circle-fill": "\uE635",
+  "uicon-question-circle-fill": "\uE666",
+  "uicon-question-circle": "\uE625",
+  "uicon-share": "\uE631",
+  "uicon-share-fill": "\uE65E",
+  "uicon-shopping-cart": "\uE621",
+  "uicon-shopping-cart-fill": "\uE65D",
+  "uicon-bell": "\uE609",
+  "uicon-bell-fill": "\uE640",
+  "uicon-list": "\uE650",
+  "uicon-list-dot": "\uE616",
+  "uicon-zhihu": "\uE6BA",
+  "uicon-zhihu-circle-fill": "\uE709",
+  "uicon-zhifubao": "\uE6B9",
+  "uicon-zhifubao-circle-fill": "\uE6B8",
+  "uicon-weixin-circle-fill": "\uE6B1",
+  "uicon-weixin-fill": "\uE6B2",
+  "uicon-twitter-circle-fill": "\uE6AB",
+  "uicon-twitter": "\uE6AA",
+  "uicon-taobao-circle-fill": "\uE6A7",
+  "uicon-taobao": "\uE6A6",
+  "uicon-weibo-circle-fill": "\uE6A5",
+  "uicon-weibo": "\uE6A4",
+  "uicon-qq-fill": "\uE6A1",
+  "uicon-qq-circle-fill": "\uE6A0",
+  "uicon-moments-circel-fill": "\uE69A",
+  "uicon-moments": "\uE69B",
+  "uicon-qzone": "\uE695",
+  "uicon-qzone-circle-fill": "\uE696",
+  "uicon-baidu-circle-fill": "\uE680",
+  "uicon-baidu": "\uE681",
+  "uicon-facebook-circle-fill": "\uE68A",
+  "uicon-facebook": "\uE689",
+  "uicon-car": "\uE60C",
+  "uicon-car-fill": "\uE636",
+  "uicon-warning-fill": "\uE64D",
+  "uicon-warning": "\uE694",
+  "uicon-clock-fill": "\uE638",
+  "uicon-clock": "\uE60F",
+  "uicon-edit-pen": "\uE612",
+  "uicon-edit-pen-fill": "\uE66B",
+  "uicon-email": "\uE611",
+  "uicon-email-fill": "\uE642",
+  "uicon-minus-circle": "\uE61B",
+  "uicon-minus-circle-fill": "\uE652",
+  "uicon-plus-circle": "\uE62E",
+  "uicon-plus-circle-fill": "\uE661",
+  "uicon-file-text": "\uE663",
+  "uicon-file-text-fill": "\uE665",
+  "uicon-pushpin": "\uE7E3",
+  "uicon-pushpin-fill": "\uE86E",
+  "uicon-grid": "\uE673",
+  "uicon-grid-fill": "\uE678",
+  "uicon-play-circle": "\uE647",
+  "uicon-play-circle-fill": "\uE655",
+  "uicon-pause-circle-fill": "\uE654",
+  "uicon-pause": "\uE8FA",
+  "uicon-pause-circle": "\uE643",
+  "uicon-eye-off": "\uE648",
+  "uicon-eye-off-outline": "\uE62B",
+  "uicon-gift-fill": "\uE65C",
+  "uicon-gift": "\uE65B",
+  "uicon-rmb-circle-fill": "\uE657",
+  "uicon-rmb-circle": "\uE677",
+  "uicon-kefu-ermai": "\uE656",
+  "uicon-server-fill": "\uE751",
+  "uicon-coupon-fill": "\uE8C4",
+  "uicon-coupon": "\uE8AE",
+  "uicon-integral": "\uE704",
+  "uicon-integral-fill": "\uE703",
+  "uicon-home-fill": "\uE964",
+  "uicon-home": "\uE965",
+  "uicon-hourglass-half-fill": "\uE966",
+  "uicon-hourglass": "\uE967",
+  "uicon-account": "\uE628",
+  "uicon-plus-people-fill": "\uE626",
+  "uicon-minus-people-fill": "\uE615",
+  "uicon-account-fill": "\uE614",
+  "uicon-thumb-down-fill": "\uE726",
+  "uicon-thumb-down": "\uE727",
+  "uicon-thumb-up": "\uE733",
+  "uicon-thumb-up-fill": "\uE72F",
+  "uicon-lock-fill": "\uE979",
+  "uicon-lock-open": "\uE973",
+  "uicon-lock-opened-fill": "\uE974",
+  "uicon-lock": "\uE97A",
+  "uicon-red-packet-fill": "\uE690",
+  "uicon-photo-fill": "\uE98B",
+  "uicon-photo": "\uE98D",
+  "uicon-volume-off-fill": "\uE659",
+  "uicon-volume-off": "\uE644",
+  "uicon-volume-fill": "\uE670",
+  "uicon-volume": "\uE633",
+  "uicon-red-packet": "\uE691",
+  "uicon-download": "\uE63C",
+  "uicon-arrow-up-fill": "\uE6B0",
+  "uicon-arrow-down-fill": "\uE600",
+  "uicon-play-left-fill": "\uE675",
+  "uicon-play-right-fill": "\uE676",
+  "uicon-rewind-left-fill": "\uE679",
+  "uicon-rewind-right-fill": "\uE67A",
+  "uicon-arrow-downward": "\uE604",
+  "uicon-arrow-leftward": "\uE601",
+  "uicon-arrow-rightward": "\uE603",
+  "uicon-arrow-upward": "\uE607",
+  "uicon-arrow-down": "\uE60D",
+  "uicon-arrow-right": "\uE605",
+  "uicon-arrow-left": "\uE60E",
+  "uicon-arrow-up": "\uE606",
+  "uicon-skip-back-left": "\uE674",
+  "uicon-skip-forward-right": "\uE672",
+  "uicon-rewind-right": "\uE66F",
+  "uicon-rewind-left": "\uE671",
+  "uicon-arrow-right-double": "\uE68D",
+  "uicon-arrow-left-double": "\uE68C",
+  "uicon-wifi-off": "\uE668",
+  "uicon-wifi": "\uE667",
+  "uicon-empty-data": "\uE62F",
+  "uicon-empty-history": "\uE684",
+  "uicon-empty-list": "\uE68B",
+  "uicon-empty-page": "\uE627",
+  "uicon-empty-order": "\uE639",
+  "uicon-man": "\uE697",
+  "uicon-woman": "\uE69C",
+  "uicon-man-add": "\uE61C",
+  "uicon-man-add-fill": "\uE64C",
+  "uicon-man-delete": "\uE61A",
+  "uicon-man-delete-fill": "\uE66A",
+  "uicon-zh": "\uE70A",
+  "uicon-en": "\uE692"
+};
+const props$1 = {
+  props: {
+    name: {
+      type: String,
+      default: defprops.icon.name
+    },
+    color: {
+      type: String,
+      default: defprops.icon.color
+    },
+    size: {
+      type: [String, Number],
+      default: defprops.icon.size
+    },
+    bold: {
+      type: Boolean,
+      default: defprops.icon.bold
+    },
+    index: {
+      type: [String, Number],
+      default: defprops.icon.index
+    },
+    hoverClass: {
+      type: String,
+      default: defprops.icon.hoverClass
+    },
+    customPrefix: {
+      type: String,
+      default: defprops.icon.customPrefix
+    },
+    label: {
+      type: [String, Number],
+      default: defprops.icon.label
+    },
+    labelPos: {
+      type: String,
+      default: defprops.icon.labelPos
+    },
+    labelSize: {
+      type: [String, Number],
+      default: defprops.icon.labelSize
+    },
+    labelColor: {
+      type: String,
+      default: defprops.icon.labelColor
+    },
+    space: {
+      type: [String, Number],
+      default: defprops.icon.space
+    },
+    imgMode: {
+      type: String,
+      default: defprops.icon.imgMode
+    },
+    width: {
+      type: [String, Number],
+      default: defprops.icon.width
+    },
+    height: {
+      type: [String, Number],
+      default: defprops.icon.height
+    },
+    top: {
+      type: [String, Number],
+      default: defprops.icon.top
+    },
+    stop: {
+      type: Boolean,
+      default: defprops.icon.stop
+    }
+  }
+};
+const props = {
+  props: {
+    color: {
+      type: String,
+      default: defprops.line.color
+    },
+    length: {
+      type: [String, Number],
+      default: defprops.line.length
+    },
+    direction: {
+      type: String,
+      default: defprops.line.direction
+    },
+    hairline: {
+      type: Boolean,
+      default: defprops.line.hairline
+    },
+    margin: {
+      type: [String, Number],
+      default: defprops.line.margin
+    },
+    dashed: {
+      type: Boolean,
+      default: defprops.line.dashed
+    }
+  }
+};
 exports._export_sfc = _export_sfc;
 exports.createSSRApp = createSSRApp;
 exports.defineComponent = defineComponent;
+exports.e = e;
+exports.icons = icons;
+exports.index = index$1;
+exports.mixin = mixin;
+exports.mpMixin = mpMixin;
+exports.n = n;
+exports.nextTick = nextTick;
+exports.o = o;
 exports.onHide = onHide;
 exports.onLaunch = onLaunch;
 exports.onShow = onShow;
+exports.p = p;
+exports.props = props$3;
+exports.props$1 = props$2;
+exports.props$2 = props$1;
+exports.props$3 = props;
+exports.ref = ref;
+exports.resolveComponent = resolveComponent;
+exports.s = s;
+exports.sr = sr;
+exports.t = t;
+exports.unref = unref;
 exports.uviewPlus = uviewPlus;

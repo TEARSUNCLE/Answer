@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "早晚答",
-  "usingComponents": {}
+  "usingComponents": {
+    "u-cell": "../../node-modules/uview-plus/components/u-cell/u-cell",
+    "u-cell-group": "../../node-modules/uview-plus/components/u-cell-group/u-cell-group"
+  }
 }

@@ -1,7 +1,7 @@
 {
 	"easycom": {
 		"custom": {  
-	    	"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue" 
+				"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue" 
 		}
 	},
 	"pages": [
@@ -32,7 +32,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
+		"navigationBarTitleText": "早晚答",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
@@ -63,8 +63,8 @@
 			},
 			{
 				"pagePath": "pages/my/index",
-				"iconPath": "static/images/cc-user.png",
-				"selectedIconPath": "static/images/cc-user-select.png",
+				"iconPath": "static/images/user.png",
+				"selectedIconPath": "static/images/user-select.png",
 				"text": "我的"
 			}
 		]

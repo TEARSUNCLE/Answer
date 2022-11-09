@@ -16,4 +16,16 @@ onHide(() => {
 </script>
 <style lang="scss">
 	@import "uview-plus/index.scss";
+
+  // 全局的默认样式
+  .size {
+    font-size: .8125rem;
+    color: #21252b;
+  }
+  .ct {
+    text-align: center;
+  }
+  .mt30 {
+    margin-top: 25px;
+  }
 </style>
